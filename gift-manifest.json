@@ -1,0 +1,24 @@
+{
+    "name": "Date Night Gift Ideas",
+    "short_name": "Gift Ideas",
+    "description": "Personalized gift ideas for date nights and special occasions.",
+    "start_url": "./gift-ideas.html",
+    "display": "standalone",
+    "orientation": "portrait-primary",
+    "background_color": "#fff1f2",
+    "theme_color": "#f43f5e",
+    "icons": [
+          {
+                  "src": "./icon-192.png",
+                  "sizes": "192x192",
+                  "type": "image/png",
+                  "purpose": "any maskable"
+          },
+          {
+                  "src": "./icon-512.png",
+                  "sizes": "512x512",
+                  "type": "image/png",
+                  "purpose": "any maskable"
+          }
+    ]
+}
