@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<title>🎁 Gift Ideas for Her</title>
+<link rel="manifest" href="manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Gift Ideas">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#f43f5e">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet" />
+<style>
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+  .line-through { text-decoration: line-through; }
+  details summary::-webkit-details-marker { display: none; }
+  .hover\:scale-125:hover { transform: scale(1.25); }
+  /* iPhone PWA: tap highlight + touch targets */
+  button, a { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+  button { min-height: 44px; }
+  /* Safe area padding for notch/home-bar */
+  body {
+    padding-bottom: env(safe-area-inset-bottom);
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useMemo } = React;
+
+const gifts = [
+  // TRAVEL
+  { id: 1, name: "Personalized Passport Holder", category: "Travel", tier: "Under $30", desc: "Monogrammed leather passport wallet — practical and chic for every trip.", occasions: ["Birthday & Anniversary", "Just because"], emoji: "✈️", link: "https://www.etsy.com/search?q=personalized+passport+holder" },
+  { id: 2, name: "Packing Cubes Set", category: "Travel", tier: "$30–$75", desc: "Color-coded packing cubes to keep her suitcase perfectly organized.", occasions: ["Birthday & Anniversary", "Just because"], emoji: "🧳", link: "https://www.amazon.com/s?k=packing+cubes+set" },
+  { id: 3, name: "Scratch-Off World Travel Map", category: "Travel", tier: "$30–$75", desc: "A large wall map she can scratch off every country she visits.", occasions: ["Birthday & Anniversary", "Just because", "Mother's Day"], emoji: "🗺️", link: "https://www.amazon.com/s?k=scratch+off+world+map" },
+  { id: 4, name: "Noise-Canceling Earbuds", category: "Travel", tier: "$75–$150", desc: "Perfect for long flights — she can zone out with podcasts or music in peace.", occasions: ["Birthday & Anniversary"], emoji: "🎧", link: "https://www.amazon.com/s?k=noise+canceling+earbuds" },
+  { id: 5, name: "Airbnb or Hotel Gift Card", category: "Travel", tier: "$150+", desc: "Let her pick the dream destination. Perfect for a couples getaway or solo retreat.", occasions: ["Birthday & Anniversary", "Mother's Day"], emoji: "🏨", link: "https://www.airbnb.com/giftcards" },
+  { id: 6, name: "Weekend Getaway Experience", category: "Travel", tier: "$150+", desc: "Plan a surprise overnight trip — a spa resort, beach town, or city she's mentioned.", occasions: ["Birthday & Anniversary", "Mother's Day"], emoji: "🌴", link: "https://www.tripadvisor.com" },
+  { id: 7, name: "Travel Jewelry Organizer", category: "Travel", tier: "Under $30", desc: "A slim roll-up case to keep her accessories tangle-free on the road.", occasions: ["Just because", "Birthday & Anniversary"], emoji: "💼", link: "https://www.amazon.com/s?k=travel+jewelry+organizer" },
+  // FOOD
+  { id: 8, name: "Fancy Charcuterie Board Kit", category: "Food", tier: "$30–$75", desc: "A beautiful serving board with knives and accessories for hosting nights.", occasions: ["Birthday & Anniversary", "Just because"], emoji: "🧀", link: "https://www.amazon.com/s?k=charcuterie+board+set" },
+  { id: 9, name: "Cooking Class Experience", category: "Food", tier: "$75–$150", desc: "A hands-on class — Asian fusion, pasta making, or sushi rolling.", occasions: ["Birthday & Anniversary", "Mother's Day"], emoji: "👩‍🍳", link: "https://www.coursehorse.com" },
+  { id: 10, name: "Omakase Dinner for Two", category: "Food", tier: "$150+", desc: "Book a tasting-menu or omakase experience at a top local restaurant.", occasions: ["Birthday & Anniversary"], emoji: "🍣", link: "https://www.opentable.com" },
+  { id: 11, name: "Specialty Tea Collection", category: "Food", tier: "$30–$75", desc: "A curated set of premium loose-leaf teas — matcha, oolong, jasmine.", occasions: ["Just because", "Mother's Day"], emoji: "🍵", link: "https://www.amazon.com/s?k=premium+tea+gift+set" },
+  { id: 12, name: "Meal Kit Subscription", category: "Food", tier: "$75–$150", desc: "A month of HelloFresh or Marley Spoon — fun to cook together as a family.", occasions: ["Just because", "Mother's Day"], emoji: "🥘", link: "https://www.hellofresh.com" },
+  { id: 13, name: "Truffle & Fancy Salts Gift Box", category: "Food", tier: "$30–$75", desc: "Gourmet flavored salts, truffle oil, and specialty spices for the home cook.", occasions: ["Just because", "Birthday & Anniversary"], emoji: "🧂", link: "https://www.amazon.com/s?k=truffle+salt+gift+set" },
+  { id: 14, name: "Food Tour Experience", category: "Food", tier: "$75–$150", desc: "A guided neighborhood food tour — great for a date day or solo adventure.", occasions: ["Birthday & Anniversary", "Mother's Day"], emoji: "🍜", link: "https://www.airbnb.com/experiences" },
+  { id: 15, name: "Bestselling Cookbook", category: "Food", tier: "$30–$75", desc: "A beautiful cookbook — Ottolenghi, Hetty Lui McKinnon, or a cuisine she loves.", occasions: ["Just because", "Birthday & Anniversary"], emoji: "📖", link: "https://www.amazon.com/s?k=bestselling+cookbook+2025" },
+  // YOGA
+  { id: 16, name: "Premium Yoga Mat (Manduka/Lululemon)", category: "Yoga", tier: "$75–$150", desc: "An upgrade-worthy mat with superior grip and cushion she'll use for years.", occasions: ["Birthday & Anniversary", "Mother's Day"], emoji: "🧘", link: "https://www.manduka.com" },
+  { id: 17, name: "Yoga Bolster & Block Set", category: "Yoga", tier: "$30–$75", desc: "Perfect for restorative yoga and deepening stretches at home.", occasions: ["Just because", "Mother's Day"], emoji: "🪨", link: "https://www.amazon.com/s?k=yoga+bolster+block+set" },
+  { id: 18, name: "Alo Moves Subscription", category: "Yoga", tier: "$75–$150", desc: "A year of premium yoga, meditation & fitness classes she can do anywhere.", occasions: ["Birthday & Anniversary", "Just because"], emoji: "📱", link: "https://www.alomoves.com" },
+  { id: 19, name: "Yoga Retreat Day Pass", category: "Yoga", tier: "$150+", desc: "A full-day retreat at a local yoga studio — classes, meditation, and healthy lunch.", occasions: ["Birthday & Anniversary", "Mother's Day"], emoji: "🌿", link: "https://www.eventbrite.com/d/online/yoga-retreat/" },
+  { id: 20, name: "Meditation Cushion (Zafu)", category: "Yoga", tier: "$30–$75", desc: "A beautiful buckwheat-filled zafu cushion to elevate her daily meditation practice.", occasions: ["Just because", "Birthday & Anniversary"], emoji: "🪷", link: "https://www.amazon.com/s?k=meditation+cushion+zafu" },
+  { id: 21, name: "Lululemon Leggings", category: "Yoga", tier: "$75–$150", desc: "The Align or Swift Speed — she'll live in these on and off the mat.", occasions: ["Birthday & Anniversary", "Mother's Day", "Just because"], emoji: "👖", link: "https://www.lululemon.com" },
+  { id: 22, name: "Yoga Wheel", category: "Yoga", tier: "$30–$75", desc: "A fun prop for backbends and core work — a fresh addition to her practice.", occasions: ["Just because"], emoji: "⭕", link: "https://www.amazon.com/s?k=yoga+wheel" },
+  // DOGS
+  { id: 23, name: "Custom Pet Portrait (Painted)", category: "Dogs", tier: "$75–$150", desc: "A beautiful hand-illustrated portrait of her dog — frameable wall art.", occasions: ["Birthday & Anniversary", "Mother's Day", "Just because"], emoji: "🎨", link: "https://www.etsy.com/search?q=custom+pet+portrait" },
+  { id: 24, name: "Matching Dog Mom Hoodie Set", category: "Dogs", tier: "$30–$75", desc: "Matching 'dog mom' sweatshirt + a bandana for the pup. Adorable photos guaranteed.", occasions: ["Mother's Day", "Just because"], emoji: "🐾", link: "https://www.etsy.com/search?q=dog+mom+hoodie" },
+  { id: 25, name: "Dog DNA Test Kit", category: "Dogs", tier: "$75–$150", desc: "Embark or Wisdom Panel — discover your pup's full breed breakdown.", occasions: ["Just because", "Birthday & Anniversary"], emoji: "🔬", link: "https://embarkvet.com" },
+  { id: 26, name: "Luxury Dog Bed or Accessories", category: "Dogs", tier: "$30–$75", desc: "A chic linen dog bed, designer collar, or fancy leash set for the beloved pup.", occasions: ["Just because", "Mother's Day"], emoji: "🛏️", link: "https://www.amazon.com/s?k=luxury+dog+bed" },
+  { id: 27, name: "Custom Dog Plush (Lookalike)", category: "Dogs", tier: "$75–$150", desc: "A stuffed animal made to look exactly like her dog — the 4-year-old will love it too!", occasions: ["Mother's Day", "Birthday & Anniversary"], emoji: "🧸", link: "https://www.etsy.com/search?q=custom+dog+plush+lookalike" },
+  // COMFORT
+  { id: 28, name: "Cashmere Robe", category: "Comfort", tier: "$150+", desc: "Ultra-soft cashmere or bamboo robe — spa-level luxury she'll reach for every morning.", occasions: ["Birthday & Anniversary", "Mother's Day"], emoji: "🌸", link: "https://www.amazon.com/s?k=cashmere+robe+women" },
+  { id: 29, name: "Heated Slippers", category: "Comfort", tier: "$30–$75", desc: "Electric USB-heated slippers — the coziest upgrade to her morning and evening routine.", occasions: ["Just because", "Birthday & Anniversary"], emoji: "🔥", link: "https://www.amazon.com/s?k=heated+slippers+women" },
+  { id: 30, name: "Weighted Blanket", category: "Comfort", tier: "$75–$150", desc: "A 15–20 lb weighted blanket for better sleep and serious couch lounging.", occasions: ["Just because", "Birthday & Anniversary"], emoji: "🛌", link: "https://www.amazon.com/s?k=weighted+blanket" },
+  { id: 31, name: "Luxury Cozy Socks Set", category: "Comfort", tier: "Under $30", desc: "A gift box of cashmere-blend or fluffy sherpa socks in beautiful colors.", occasions: ["Just because", "Mother's Day"], emoji: "🧦", link: "https://www.amazon.com/s?k=luxury+cozy+socks+gift+set" },
+  { id: 32, name: "Cashmere Sweater or Wrap", category: "Comfort", tier: "$150+", desc: "A soft, timeless cashmere crewneck or wrap she'll wear for years.", occasions: ["Birthday & Anniversary", "Mother's Day"], emoji: "🧣", link: "https://www.amazon.com/s?k=women+cashmere+sweater" },
+  // SELF-CARE
+  { id: 33, name: "Spa Day Gift Card", category: "Self-Care", tier: "$150+", desc: "A gift card to a local spa for a facial, massage, or full day package.", occasions: ["Birthday & Anniversary", "Mother's Day"], emoji: "💆", link: "https://www.spafinder.com" },
+  { id: 34, name: "Gua Sha + Jade Roller Set", category: "Self-Care", tier: "Under $30", desc: "An elegant facial massage tool set — part skincare ritual, part self-care.", occasions: ["Just because", "Mother's Day"], emoji: "💎", link: "https://www.amazon.com/s?k=gua+sha+jade+roller+set" },
+  { id: 35, name: "Premium Skincare Set", category: "Self-Care", tier: "$75–$150", desc: "A curated skincare set — serum, moisturizer, eye cream — from a brand she loves.", occasions: ["Birthday & Anniversary", "Mother's Day"], emoji: "✨", link: "https://www.sephora.com/beauty/skincare-sets" },
+  { id: 36, name: "Aromatherapy Diffuser + Oils", category: "Self-Care", tier: "$30–$75", desc: "A beautiful ceramic diffuser with essential oils for her yoga space or bedroom.", occasions: ["Just because", "Birthday & Anniversary"], emoji: "🕯️", link: "https://www.amazon.com/s?k=aromatherapy+diffuser+essential+oils+set" },
+  { id: 37, name: "Sound Bath or Meditation Class", category: "Self-Care", tier: "$30–$75", desc: "Book her into a local sound bath session — deeply restorative and unique.", occasions: ["Birthday & Anniversary", "Mother's Day", "Just because"], emoji: "🎶", link: "https://www.eventbrite.com/d/online/sound-bath/" },
+  { id: 38, name: "Manicure/Pedicure Gift Card", category: "Self-Care", tier: "$30–$75", desc: "A gift card to her favorite nail salon — simple, practical, always appreciated.", occasions: ["Just because", "Mother's Day"], emoji: "💅", link: "https://www.google.com/search?q=nail+salon+near+me" },
+  // EXPERIENCES
+  { id: 39, name: "Concert or Show Tickets", category: "Experiences", tier: "$150+", desc: "Tickets to see her favorite artist, a Broadway show, or a comedy night.", occasions: ["Birthday & Anniversary", "Just because"], emoji: "🎤", link: "https://www.ticketmaster.com" },
+  { id: 40, name: "Pottery Class for Two", category: "Experiences", tier: "$75–$150", desc: "A couples pottery class — hands-on, creative, and a great date night.", occasions: ["Birthday & Anniversary", "Just because"], emoji: "🏺", link: "https://www.coursehorse.com" },
+  { id: 41, name: "Hot Air Balloon Ride", category: "Experiences", tier: "$150+", desc: "A once-in-a-lifetime sunrise hot air balloon experience — unforgettable.", occasions: ["Birthday & Anniversary"], emoji: "🎈", link: "https://www.groupon.com/local/hot-air-balloon-ride" },
+  { id: 42, name: "Photography Mini Session", category: "Experiences", tier: "$75–$150", desc: "A family or mommy-and-me photo session with a local photographer.", occasions: ["Mother's Day", "Birthday & Anniversary"], emoji: "📸", link: "https://www.thumbtack.com/k/photographer/near-me/" },
+];
+
+const alreadyGifted = [
+  { name: "Phone Case", emoji: "📱" },
+  { name: "Greeting Cards", emoji: "💌" },
+  { name: "Photo Coffee Mug", emoji: "☕" },
+  { name: "Massage Gun", emoji: "💪" },
+  { name: "Warm Clothing", emoji: "🧥" },
+  { name: "Jewelry", emoji: "💍" },
+];
+
+const CATEGORIES = ["All", "Travel", "Food", "Yoga", "Dogs", "Comfort", "Self-Care", "Experiences"];
+const BUDGETS = ["All Budgets", "Under $30", "$30–$75", "$75–$150", "$150+"];
+const OCCASIONS = ["All Occasions", "Birthday & Anniversary", "Mother's Day", "Just because"];
+
+const CAT_COLORS = {
+  Travel: { bg: "#e0f2fe", color: "#0369a1" },
+  Food: { bg: "#ffedd5", color: "#c2410c" },
+  Yoga: { bg: "#f3e8ff", color: "#7e22ce" },
+  Dogs: { bg: "#fef9c3", color: "#92400e" },
+  Comfort: { bg: "#ffe4e6", color: "#be123c" },
+  "Self-Care": { bg: "#fce7f3", color: "#9d174d" },
+  Experiences: { bg: "#d1fae5", color: "#065f46" },
+};
+
+function GiftApp() {
+  const [category, setCategory] = React.useState("All");
+  const [budget, setBudget] = React.useState("All Budgets");
+  const [occasion, setOccasion] = React.useState("All Occasions");
+  const [favorites, setFavorites] = React.useState(new Set());
+  const [showFavOnly, setShowFavOnly] = React.useState(false);
+  const [search, setSearch] = React.useState("");
+  const [surprise, setSurprise] = React.useState(null);
+
+  const filtered = React.useMemo(() => {
+    return gifts.filter((g) => {
+      if (showFavOnly && !favorites.has(g.id)) return false;
+      if (category !== "All" && g.category !== category) return false;
+      if (budget !== "All Budgets" && g.tier !== budget) return false;
+      if (occasion !== "All Occasions" && !g.occasions.includes(occasion)) return false;
+      if (search && !g.name.toLowerCase().includes(search.toLowerCase()) && !g.desc.toLowerCase().includes(search.toLowerCase())) return false;
+      return true;
+    });
+  }, [category, budget, occasion, favorites, showFavOnly, search]);
+
+  const toggleFav = (id) => {
+    setFavorites((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
+
+  const doSurprise = () => {
+    const pick = gifts[Math.floor(Math.random() * gifts.length)];
+    setCategory("All"); setBudget("All Budgets"); setOccasion("All Occasions");
+    setShowFavOnly(false); setSearch(pick.name);
+  };
+
+  const reset = () => { setCategory("All"); setBudget("All Budgets"); setOccasion("All Occasions"); setShowFavOnly(false); setSearch(""); };
+
+  return (
+    <div style={{ minHeight: "100vh", background: "linear-gradient(135deg,#fff1f2,#f5f3ff)", fontFamily: "-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" }}>
+      {/* HEADER */}
+      <div style={{ background: "#fff", boxShadow: "0 1px 4px rgba(0,0,0,0.08)", padding: "18px 24px" }}>
+        <div style={{ maxWidth: 960, margin: "0 auto", display: "flex", flexWrap: "wrap", alignItems: "center", gap: 12 }}>
+          <div style={{ flex: 1, minWidth: 200 }}>
+            <h1 style={{ margin: 0, fontSize: 22, fontWeight: 700, color: "#1f2937" }}>🎁 Gift Ideas for Her</h1>
+            <p style={{ margin: "4px 0 0", fontSize: 13, color: "#9ca3af" }}>Travel · Food · Yoga · Dogs · Comfort · Self-Care · Experiences</p>
+          </div>
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+            <button onClick={doSurprise} style={{ padding: "8px 16px", background: "#f43f5e", color: "#fff", border: "none", borderRadius: 999, cursor: "pointer", fontSize: 13, fontWeight: 600 }}>🎲 Surprise Me</button>
+            <button onClick={() => setShowFavOnly(!showFavOnly)} style={{ padding: "8px 16px", background: showFavOnly ? "#fbbf24" : "#fff", color: showFavOnly ? "#fff" : "#6b7280", border: "1px solid " + (showFavOnly ? "#fbbf24" : "#e5e7eb"), borderRadius: 999, cursor: "pointer", fontSize: 13, fontWeight: 600 }}>
+              ⭐ Favorites {favorites.size > 0 && `(${favorites.size})`}
+            </button>
+            <button onClick={reset} style={{ padding: "8px 16px", background: "#fff", color: "#9ca3af", border: "1px solid #e5e7eb", borderRadius: 999, cursor: "pointer", fontSize: 13 }}>↺ Reset</button>
+          </div>
+        </div>
+      </div>
+
+      {/* FILTERS */}
+      <div style={{ maxWidth: 960, margin: "0 auto", padding: "16px 20px 8px" }}>
+        <input type="text" placeholder="🔍  Search gifts..." value={search} onChange={e => setSearch(e.target.value)}
+          style={{ width: "100%", boxSizing: "border-box", padding: "10px 16px", border: "1px solid #e5e7eb", borderRadius: 12, fontSize: 14, outline: "none", background: "#fff", marginBottom: 10 }} />
+        <ChipRow items={CATEGORIES} active={category} onSelect={setCategory} activeColor="#f43f5e" />
+        <ChipRow items={BUDGETS} active={budget} onSelect={setBudget} activeColor="#8b5cf6" />
+        <ChipRow items={OCCASIONS} active={occasion} onSelect={setOccasion} activeColor="#059669" />
+        <p style={{ fontSize: 12, color: "#9ca3af", marginTop: 8 }}>{filtered.length} gift idea{filtered.length !== 1 ? "s" : ""} found</p>
+      </div>
+
+      {/* GRID */}
+      <div style={{ maxWidth: 960, margin: "0 auto", padding: "0 20px 32px", display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(280px,1fr))", gap: 16 }}>
+        {filtered.map(g => <GiftCard key={g.id} g={g} fav={favorites.has(g.id)} onFav={() => toggleFav(g.id)} />)}
+        {filtered.length === 0 && (
+          <div style={{ gridColumn: "1/-1", textAlign: "center", padding: "48px 0", color: "#9ca3af" }}>
+            <div style={{ fontSize: 48 }}>🎁</div>
+            <p style={{ fontWeight: 600, color: "#6b7280", marginTop: 8 }}>No gifts match your filters.</p>
+            <button onClick={reset} style={{ marginTop: 8, background: "none", border: "none", color: "#f43f5e", cursor: "pointer", textDecoration: "underline", fontSize: 14 }}>Clear filters</button>
+          </div>
+        )}
+      </div>
+
+      {/* ALREADY GIFTED */}
+      <div style={{ maxWidth: 960, margin: "0 auto", padding: "0 20px 40px" }}>
+        <details style={{ background: "#fff", border: "1px solid #f3f4f6", borderRadius: 16, padding: "14px 20px" }}>
+          <summary style={{ cursor: "pointer", fontSize: 13, fontWeight: 600, color: "#9ca3af", userSelect: "none", listStyle: "none" }}>📦 Already Gifted — avoid repeating these</summary>
+          <div style={{ marginTop: 10, display: "flex", flexWrap: "wrap", gap: 8 }}>
+            {alreadyGifted.map(a => (
+              <span key={a.name} style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "#f3f4f6", color: "#9ca3af", fontSize: 12, padding: "5px 12px", borderRadius: 999, textDecoration: "line-through" }}>
+                {a.emoji} {a.name}
+              </span>
+            ))}
+          </div>
+        </details>
+      </div>
+    </div>
+  );
+}
+
+function ChipRow({ items, active, onSelect, activeColor }) {
+  return (
+    <div style={{ display: "flex", flexWrap: "wrap", gap: 7, marginBottom: 8 }}>
+      {items.map(item => (
+        <button key={item} onClick={() => onSelect(item)} style={{
+          padding: "6px 14px", borderRadius: 999, fontSize: 12, fontWeight: 600, cursor: "pointer",
+          background: active === item ? activeColor : "#fff",
+          color: active === item ? "#fff" : "#6b7280",
+          border: "1px solid " + (active === item ? activeColor : "#e5e7eb"),
+          transition: "all 0.15s"
+        }}>{item}</button>
+      ))}
+    </div>
+  );
+}
+
+function GiftCard({ g, fav, onFav }) {
+  const c = CAT_COLORS[g.category] || { bg: "#f3f4f6", color: "#374151" };
+  return (
+    <div style={{ background: "#fff", borderRadius: 18, border: "1px solid #f3f4f6", padding: "16px", display: "flex", flexDirection: "column", gap: 10, boxShadow: "0 1px 4px rgba(0,0,0,0.05)", transition: "box-shadow 0.2s" }}
+      onMouseEnter={e => e.currentTarget.style.boxShadow = "0 4px 16px rgba(0,0,0,0.1)"}
+      onMouseLeave={e => e.currentTarget.style.boxShadow = "0 1px 4px rgba(0,0,0,0.05)"}>
+      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <span style={{ fontSize: 22 }}>{g.emoji}</span>
+          <span style={{ fontSize: 11, fontWeight: 700, padding: "3px 9px", borderRadius: 999, background: c.bg, color: c.color }}>{g.category}</span>
+        </div>
+        <button onClick={onFav} style={{ fontSize: 20, background: "none", border: "none", cursor: "pointer", lineHeight: 1, transition: "transform 0.15s", padding: 0 }}
+          onMouseEnter={e => e.currentTarget.style.transform = "scale(1.3)"}
+          onMouseLeave={e => e.currentTarget.style.transform = "scale(1)"}>
+          {fav ? "⭐" : "☆"}
+        </button>
+      </div>
+      <div>
+        <div style={{ fontWeight: 700, fontSize: 15, color: "#1f2937", lineHeight: 1.3 }}>{g.name}</div>
+        <div style={{ fontSize: 13, color: "#6b7280", marginTop: 5, lineHeight: 1.5 }}>{g.desc}</div>
+      </div>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: "auto", paddingTop: 4 }}>
+        <span style={{ fontSize: 13, fontWeight: 700, color: "#374151" }}>{g.tier}</span>
+        <a href={g.link} target="_blank" rel="noopener noreferrer"
+          style={{ fontSize: 12, padding: "6px 14px", background: "#fff1f2", color: "#f43f5e", border: "1px solid #fecdd3", borderRadius: 999, textDecoration: "none", fontWeight: 600, transition: "background 0.15s" }}
+          onMouseEnter={e => e.currentTarget.style.background = "#ffe4e6"}
+          onMouseLeave={e => e.currentTarget.style.background = "#fff1f2"}>
+          Shop →
+        </a>
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.render(<GiftApp />, document.getElementById("root"));
+</script>
+
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js').catch(() => {});
+    });
+  }
+</script>
+</body>
+</html>
