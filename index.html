@@ -1,0 +1,1435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+  <title>Atlanta Date Night Generator</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Date Night">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#e94560">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <style>
+    :root {
+      --bg: #0f0f1a;
+      --card: #1a1a2e;
+      --card2: #16213e;
+      --accent: #e94560;
+      --gold: #f5a623;
+      --purple: #7c4dff;
+      --teal: #00bfa5;
+      --blue: #2979ff;
+      --text: #eee;
+      --muted: #888;
+      --radius: 14px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 0 0 60px 0;
+      /* iOS safe areas */
+      padding-bottom: max(60px, calc(60px + env(safe-area-inset-bottom)));
+    }
+
+    /* HEADER */
+    .header {
+      background: linear-gradient(135deg, #1a1a2e 0%, #0d0d1f 100%);
+      border-bottom: 1px solid rgba(233,69,96,0.3);
+      padding: 28px 24px 20px;
+      padding-top: max(28px, calc(28px + env(safe-area-inset-top)));
+      padding-left: max(24px, calc(16px + env(safe-area-inset-left)));
+      padding-right: max(24px, calc(16px + env(safe-area-inset-right)));
+      text-align: center;
+      position: relative;
+    }
+    .header h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      background: linear-gradient(90deg, #e94560, #f5a623);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 6px;
+    }
+    .header .heart { font-size: 1.5rem; margin: 0 6px; }
+    .date-display {
+      font-size: 1rem;
+      color: var(--muted);
+      margin-top: 6px;
+      letter-spacing: 0.5px;
+    }
+    .date-display span { color: var(--gold); font-weight: 600; }
+
+    /* TABS */
+    .tabs {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      padding: 20px 24px 0;
+      flex-wrap: wrap;
+    }
+    @media (max-width: 600px) {
+      .tabs {
+        flex-wrap: nowrap;
+        justify-content: flex-start;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        padding: 16px 16px 0;
+        gap: 8px;
+        scrollbar-width: none;
+      }
+      .tabs::-webkit-scrollbar { display: none; }
+    }
+    .tab-btn {
+      background: var(--card);
+      border: 2px solid transparent;
+      border-radius: 30px;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 0.88rem;
+      font-weight: 600;
+      padding: 8px 22px;
+      transition: all 0.2s;
+      letter-spacing: 0.3px;
+      min-height: 44px;
+      white-space: nowrap;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+    .tab-btn:hover { border-color: var(--accent); color: var(--text); }
+    .tab-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .tab-btn.highlight { border-color: var(--teal); color: var(--teal); }
+    .tab-btn.highlight.active { background: var(--teal); border-color: var(--teal); color: #fff; }
+
+    /* CONTENT */
+    .content { max-width: 960px; margin: 0 auto; padding: 24px 16px 0; }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* SECTION LABEL */
+    .section-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin: 28px 0 12px;
+      padding-left: 10px;
+      border-left: 3px solid var(--accent);
+    }
+
+    /* GRID */
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 14px; margin-bottom: 6px; }
+    .grid-3 { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
+
+    /* CARDS */
+    .card {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 16px 18px;
+      border: 1px solid rgba(255,255,255,0.05);
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+    .card:hover { transform: translateY(-2px); box-shadow: 0 6px 24px rgba(0,0,0,0.4); }
+
+    /* LINK BUTTONS */
+    .link-btn {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--card);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      color: var(--text);
+      text-decoration: none;
+      font-size: 0.93rem;
+      font-weight: 500;
+      transition: all 0.18s;
+      cursor: pointer;
+      min-height: 44px;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+    .link-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 20px rgba(0,0,0,0.35);
+      border-color: rgba(255,255,255,0.2);
+    }
+    .link-btn .icon {
+      font-size: 1.4rem;
+      min-width: 32px;
+      text-align: center;
+    }
+    .link-btn .label { flex: 1; }
+    .link-btn .label strong { display: block; font-size: 0.95rem; }
+    .link-btn .label span { font-size: 0.78rem; color: var(--muted); }
+    .link-btn .arrow { color: var(--muted); font-size: 0.8rem; }
+
+    /* COLOR ACCENTS */
+    .accent-red { border-left: 3px solid var(--accent); }
+    .accent-gold { border-left: 3px solid var(--gold); }
+    .accent-purple { border-left: 3px solid var(--purple); }
+    .accent-teal { border-left: 3px solid var(--teal); }
+    .accent-blue { border-left: 3px solid var(--blue); }
+
+    /* BADGE */
+    .badge {
+      display: inline-block;
+      font-size: 0.68rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 20px;
+      letter-spacing: 0.5px;
+      margin-left: 6px;
+      vertical-align: middle;
+    }
+    .badge-login { background: rgba(245,166,35,0.2); color: var(--gold); border: 1px solid rgba(245,166,35,0.4); }
+    .badge-free { background: rgba(0,191,165,0.2); color: var(--teal); border: 1px solid rgba(0,191,165,0.4); }
+    .badge-new { background: rgba(233,69,96,0.2); color: var(--accent); border: 1px solid rgba(233,69,96,0.4); }
+
+    /* CLAUDE PROMPT CARD */
+    .prompt-card {
+      background: linear-gradient(135deg, #1a1a2e, #0d1b2a);
+      border: 1px solid rgba(41,121,255,0.3);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-top: 10px;
+    }
+    .prompt-card h3 { color: var(--blue); font-size: 1rem; margin-bottom: 10px; }
+    .prompt-text {
+      background: rgba(0,0,0,0.4);
+      border-radius: 8px;
+      padding: 14px;
+      font-size: 0.82rem;
+      color: #aaa;
+      line-height: 1.6;
+      margin-bottom: 14px;
+      max-height: 180px;
+      overflow-y: auto;
+      font-family: monospace;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .copy-btn {
+      background: var(--blue);
+      border: none;
+      border-radius: 8px;
+      color: #fff;
+      cursor: pointer;
+      font-size: 0.88rem;
+      font-weight: 600;
+      padding: 10px 20px;
+      min-height: 44px;
+      transition: opacity 0.2s;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+    .copy-btn:hover { opacity: 0.85; }
+    .copy-btn.copied { background: var(--teal); }
+
+    /* TIP BOX */
+    .tip {
+      background: rgba(124,77,255,0.12);
+      border: 1px solid rgba(124,77,255,0.3);
+      border-radius: 10px;
+      padding: 12px 16px;
+      font-size: 0.84rem;
+      color: #bbb;
+      margin-top: 16px;
+      line-height: 1.6;
+    }
+    .tip strong { color: #c9a0ff; }
+
+    /* WEEKLY TABLE */
+    .weekly-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 8px;
+      margin: 16px 0;
+    }
+    @media (max-width: 700px) {
+      .weekly-grid { grid-template-columns: repeat(4, 1fr); }
+    }
+    .day-card {
+      background: var(--card);
+      border-radius: 10px;
+      padding: 12px 8px;
+      text-align: center;
+      border: 1px solid rgba(255,255,255,0.05);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .day-card:hover, .day-card.today { background: var(--card2); border-color: var(--accent); }
+    .day-card.today .day-name { color: var(--accent); }
+    .day-name { font-size: 0.75rem; font-weight: 700; letter-spacing: 1px; color: var(--muted); text-transform: uppercase; }
+    .day-num { font-size: 1.3rem; font-weight: 700; margin: 4px 0; }
+    .day-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); margin: 0 auto; opacity: 0; }
+    .day-card.today .day-dot { opacity: 1; }
+
+    /* ===================== */
+    /* LIVE SEARCH STYLES    */
+    /* ===================== */
+
+    .live-search-hero {
+      background: linear-gradient(135deg, #1a1a2e, #0d1b2a);
+      border: 1px solid rgba(0,191,165,0.3);
+      border-radius: var(--radius);
+      padding: 36px 28px;
+      text-align: center;
+      margin: 16px 0 8px;
+    }
+    .live-search-icon { font-size: 2.8rem; margin-bottom: 14px; }
+    .live-search-title { font-size: 1.3rem; color: var(--teal); margin-bottom: 10px; }
+    .live-search-sub {
+      color: var(--muted);
+      font-size: 0.9rem;
+      line-height: 1.65;
+      max-width: 500px;
+      margin: 0 auto 24px;
+    }
+    .main-launch-btn {
+      background: linear-gradient(135deg, var(--teal), #008a78);
+      border: none;
+      border-radius: 12px;
+      color: #fff;
+      cursor: pointer;
+      font-size: 1.05rem;
+      font-weight: 700;
+      padding: 15px 32px;
+      min-height: 44px;
+      transition: opacity 0.2s, transform 0.15s;
+      letter-spacing: 0.2px;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+    .main-launch-btn:hover { opacity: 0.9; transform: translateY(-2px); }
+    .live-search-note {
+      margin-top: 12px;
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+
+    /* Launch cards — same look as link-btn but as <button> */
+    .launch-card {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--card);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      color: var(--text);
+      font-size: 0.93rem;
+      font-weight: 500;
+      transition: all 0.18s;
+      cursor: pointer;
+      text-align: left;
+      width: 100%;
+      min-height: 44px;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+    .launch-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 20px rgba(0,0,0,0.35);
+      border-color: rgba(255,255,255,0.2);
+    }
+    .launch-icon { font-size: 1.4rem; min-width: 32px; text-align: center; }
+    .launch-label { flex: 1; }
+    .launch-label strong { display: block; font-size: 0.95rem; }
+    .launch-label span { font-size: 0.78rem; color: var(--muted); }
+    .launch-arrow { color: var(--muted); font-size: 0.8rem; }
+
+    /* EDITABLE PROMPT AREA */
+    .prompt-editor {
+      margin-top: 20px;
+      background: var(--card);
+      border: 1px solid rgba(41,121,255,0.35);
+      border-radius: var(--radius);
+      padding: 18px 20px;
+      animation: fadeSlideIn 0.2s ease;
+    }
+    @keyframes fadeSlideIn {
+      from { opacity: 0; transform: translateY(-6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .prompt-editor-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .prompt-editor-title {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--blue);
+      letter-spacing: 0.3px;
+    }
+    .prompt-reset-btn {
+      background: none;
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 6px;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 0.78rem;
+      padding: 4px 10px;
+      transition: all 0.15s;
+    }
+    .prompt-reset-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .prompt-textarea {
+      width: 100%;
+      background: rgba(0,0,0,0.35);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 8px;
+      color: #ccc;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      font-size: 0.88rem;
+      line-height: 1.6;
+      padding: 12px 14px;
+      resize: vertical;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .prompt-textarea:focus { border-color: var(--blue); color: var(--text); }
+    .prompt-editor-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 12px;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .prompt-editor-hint { font-size: 0.78rem; color: var(--muted); flex: 1; }
+    .prompt-launch-btn {
+      background: linear-gradient(135deg, var(--blue), #1a5fcc);
+      border: none;
+      border-radius: 8px;
+      color: #fff;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 700;
+      padding: 10px 22px;
+      min-height: 44px;
+      transition: opacity 0.2s, transform 0.15s;
+      white-space: nowrap;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+    .prompt-launch-btn:hover { opacity: 0.88; transform: translateY(-1px); }
+
+    /* FOOTER */
+    .footer {
+      text-align: center;
+      padding: 40px 16px 0;
+      padding-bottom: max(16px, env(safe-area-inset-bottom));
+      color: var(--muted);
+      font-size: 0.8rem;
+    }
+    .footer span { color: var(--accent); }
+
+    /* RESPONSIVE */
+    @media (max-width: 600px) {
+      .header h1 { font-size: 1.5rem; }
+      .grid { grid-template-columns: 1fr; }
+      .api-input-row { flex-direction: column; }
+      .search-controls { flex-direction: column; align-items: flex-start; }
+      .api-connected-badge { margin-left: 0; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <h1>❤️ Atlanta Date Night</h1>
+  <div class="date-display" id="dateDisplay">Loading...</div>
+</div>
+
+<div class="tabs">
+  <button class="tab-btn active" onclick="showTab('tonight', this)">🔥 Tonight / Weekend</button>
+  <button class="tab-btn" onclick="showTab('her', this)">💃 Her Picks</button>
+  <button class="tab-btn" onclick="showTab('him', this)">🎯 His Picks</button>
+  <button class="tab-btn" onclick="showTab('both', this)">💑 Both Love</button>
+  <button class="tab-btn" onclick="showTab('plan', this)">📅 Plan Ahead</button>
+  <button class="tab-btn" onclick="showTab('claude', this)">🤖 Ask Claude</button>
+  <button class="tab-btn highlight" onclick="showTab('search', this)">✨ Live Search</button>
+</div>
+
+<div class="content">
+
+  <!-- TONIGHT / WEEKEND -->
+  <div class="tab-panel active" id="tab-tonight">
+    <div class="section-label">What's Happening Right Now</div>
+
+    <div class="weekly-grid" id="weeklyGrid"></div>
+
+    <div class="section-label">Best Event Search Sites</div>
+    <div class="grid">
+      <a class="link-btn accent-blue" href="https://www.facebook.com/events/search/?q=atlanta" target="_blank">
+        <span class="icon">👥</span>
+        <span class="label"><strong>Facebook Events — Atlanta</strong><span>Best for local events & hidden gems <span class="badge badge-login">LOGIN REQ'D</span></span></span>
+        <span class="arrow">↗</span>
+      </a>
+      <a class="link-btn accent-blue" href="https://www.eventbrite.com/d/ga--atlanta/events/" target="_blank">
+        <span class="icon">🎟️</span>
+        <span class="label"><strong>Eventbrite Atlanta</strong><span>Concerts, comedy, festivals, classes</span></span>
+        <span class="arrow">↗</span>
+      </a>
+      <a class="link-btn accent-red" href="https://www.google.com/search?q=things+to+do+in+Atlanta+this+weekend&ibp=htl;events" target="_blank">
+        <span class="icon">🔍</span>
+        <span class="label"><strong>Google Events — This Weekend</strong><span>Quick overview of all event types</span></span>
+        <span class="arrow">↗</span>
+      </a>
+      <a class="link-btn accent-gold" href="https://www.atlantamagazine.com/things-to-do/" target="_blank">
+        <span class="icon">📰</span>
+        <span class="label"><strong>Atlanta Magazine</strong><span>Curated "best of" events &amp; guides</span></span>
+        <span class="arrow">↗</span>
+      </a>
+      <a class="link-btn accent-teal" href="https://www.yelp.com/search?find_desc=events&find_loc=Atlanta%2C+GA" target="_blank">
+        <span class="icon">⭐</span>
+        <span class="label"><strong>Yelp Events — Atlanta</strong><span>Great for trivia &amp; restaurant events</span></span>
+        <span class="arrow">↗</span>
+      </a>
+      <a class="link-btn accent-purple" href="https://aroundatlanta.com/events/" target="_blank">
+        <span class="icon">🏙️</span>
+        <span class="label"><strong>Around Atlanta</strong><span>Local guide to Atlanta events</span></span>
+        <span class="arrow">↗</span>
+      </a>
+    </div>
+
+    <div class="section-label">Live Music Right Now</div>
+    <div class="grid">
+      <a class="link-btn accent-red" href="https://www.bandsintown.com/c/atlanta-ga" target="_blank">
+        <span class="icon">🎸</span>
+        <span class="label"><strong>Bandsintown — Atlanta</strong><span>All upcoming Atlanta concerts</span></span>
+        <span class="arrow">↗</span>
+      </a>
+      <a class="link-btn accent-red" href="https://www.songkick.com/metro-areas/26330-us-atlanta" target="_blank">
+        <span class="icon">🎵</span>
+        <span class="label"><strong>Songkick — Atlanta</strong><span>Concert listings &amp; ticket links</span></span>
+        <span class="arrow">↗</span>
+      </a>
+      <a class="link-btn accent-red" href="https://www.axs.com/search?q=&lat=33.749&lon=-84.388&radius=30&sort=date&category=music" target="_blank">
+        <span class="icon">🎤</span>
+        <span class="label"><strong>AXS — Atlanta Music</strong><span>Major venue shows &amp; tickets</span></span>
+        <span class="arrow">↗</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- HER PICKS -->
+  <div class="tab-panel" id="tab-her">
+    <div class="section-label">Live Music &amp; Concerts</div>
+    <div class="grid">
+      <a class="link-btn accent-red" href="https://www.bandsintown.com/c/atlanta-ga" target="_blank">
+        <span class="icon">🎸</span>
+        <span class="label"><strong>All Atlanta Concerts</strong><span>Bandsintown — full listings</span></span>
+        <span class="arrow">↗</span>
+      </a>
+      <a class="link-btn accent-red" href="https://www.ticketmaster.com/search?q=atlanta+music&type=event" target="_blank">
+        <span class="icon">🎟️</span>
+        <span class="label"><strong>Ticketmaster — Atlanta Music</strong><span>Major shows &amp; arena events</span></span>
+        <span class="arrow">↗</span>
+      </a>
+      <a class="link-btn accent-red" href="https://www.facebook.com/events/search/?q=atlanta+live+music" target="_blank">
+        <span class="icon">👥</span>
+        <span class="label"><strong>FB: Live Music Atlanta</strong><span>Small venues &amp; local bands <span class="badge badge-login">LOGIN</span></span></span>
+        <span class="arrow">↗</span>
+      </a>
+      <a class="link-btn accent-red" href="https://www.yelp.com/search?find_desc=jazz+bar&find_loc=Atlanta%2C+GA" target="_blank">
+        <span class="icon">🎷</span>
+        <span class="label"><strong>Yelp — Jazz Bars Atlanta</strong><span>Jazz &amp; blues venues</span></span>
+        <span class="arrow">↗</span>
+      </a>
+    </div>
+
+    <div class="section-label">Comedy Shows</div>
+    <div class="grid">
+      <a class="link-btn accent-gold" href="https://www.eventbrite.com/d/ga--atlanta/comedy/" target="_blank">
+        <span class="icon">🎭</span>
+        <span class="label"><strong>Eventbrite — Atlanta Comedy</strong><span>Stand-up, improv &amp; open mics</span></span>
+        <span class="arrow">↗</span>
+      </a>
+      <a class="link-btn accent-gold" href="https://www.facebook.com/events/search/?q=atlanta+comedy+show" target="_blank">
+        <span class="icon">😂</span>
+        <span class="label"><strong>FB: Atlanta Comedy Events</strong><span>Local &amp; touring comedians <span class="badge badge-login">LOGIN</span></span></span>
+        <span class="arrow">↗</span>
+      </a>
+      <a class="link-btn accent-gold" href="https://www.ticketmaster.com/search?q=atlanta+comedy&type=event" target="_blank">
+        <span class="icon">🎤</span>
+        <span class="label"><strong>Ticketmaster — Comedy</strong><span>Major comedy club shows</span></span>
+        <span class="arrow">↗</span>
+      </a>
+    </div>
+
+    <div class="section-label">Festivals</div>
+    <div class="grid">
+      <a class="link-btn accent-purple" href="https://www.eventbrite.com/d/ga--atlanta/festivals/" target="_blank">
+        <span class="icon">🎪</span>
+        <span class="label"><strong>Eventbrite — Festivals</strong><span>Food, art, music &amp; culture fests</span></span>
+        <span class="arrow">↗</span>
+      </a>
+      <a class="link-btn accent-purple" href="https://www.facebook.com/events/search/?q=atlanta+festival" target="_blank">
+        <span class="icon">🎡</span>
+        <span class="label"><strong>FB: Atlanta Festivals</strong><span>Community &amp; neighborhood fests <span class="badge badge-login">LOGIN</span></span></span>
+        <span class="arrow">↗</span>
+      </a>
+      <a class="link-btn accent-purple" href="https://www.google.com/search?q=festivals+in+Atlanta+this+month&ibp=htl;events" target="_blank">
+        <span class="icon">🌟</span>
+        <span class="label"><strong>Google: Atlanta Festivals</strong><span>This month's festivals</span></span>
+        <span class="arrow">↗</span>
+      </a>
+    </div>
+
+    <div class="section-label">Restaurants &amp; Dining</div>
+    <div class="grid">
+      <a class="link-btn accent-teal" href="https://www.opentable.com/s?covers=2&metroId=98&term=atlanta" target="_blank">
+        <span class="icon">🍽️</span>
+        <span class="label"><strong>OpenTable — Atlanta</strong><span>Reserve trendy &amp; upscale spots</span></span>
+        <span class="arrow">↗</span>
+      </a>
+      <a class="link-btn accent-teal" href="https://www.yelp.com/search?find_desc=restaurants&find_loc=Atlanta%2C+GA&sortby=rating" target="_blank">
+        <span class="icon">⭐</span>
+        <span class="label"><strong>Yelp — Top Rated Atlanta</strong><span>Highest rated restaurants nearby</span></span>
+        <span class="arrow">↗</span>
+      </a>
+      <a class="link-btn accent-teal" href="https://atlanta.eater.com/" target="_blank">
+        <span class="icon">🔥</span>
+        <span class="label"><strong>Eater Atlanta</strong><span>Hot new openings &amp; food news</span></span>
+        <span class="arrow">↗</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- HIS PICKS -->
+  <div class="tab-panel" id="tab-him">
+    <div class="section-label">Bowling</div>
+    <div class="grid">
+      <a class="link-btn accent-blue" href="https://www.starsandstrikes.com/atlanta/" target="_blank">
+        <span class="icon">🎳</span>
+        <span class="label"><strong>Stars &amp; Strikes</strong><span>Multiple Atlanta locations</span></span>
+        <span class="arrow">↗</span>
+      </a>
+      <a class="link-btn accent-blue" href="https://www.bowlero.com/location/bowlero-marietta" target="_blank">
+        <span class="icon">🎳</span>
+        <span class="label"><strong>Bowlero — Marietta</strong><span>Upscale bowling + food &amp; drinks</span></span>
+        <span class="arrow">↗</span>
+      </a>
+      <a class="link-btn accent-blue" href="https://www.yelp.com/search?find_desc=bowling&find_loc=Atlanta%2C+GA" target="_blank">
+        <span class="icon">🔍</span>
+        <span class="label"><strong>All Bowling in Atlanta</strong><span>Find all options via Yelp</span></span>
+        <span class="arrow">↗</span>
+      </a>
+    </div>
+
+    <div class="section-label">Billiards &amp; Pool</div>
+    <div class="grid">
+      <a class="link-btn accent-gold" href="https://www.yelp.com/search?find_desc=pool+hall+billiards&find_loc=Atlanta%2C+GA" target="_blank">
+        <span class="icon">🎱</span>
+        <span class="label"><strong>Yelp — Atlanta Pool Halls</strong><span>Billiards bars &amp; halls near you</span></span>
+        <span class="arrow">↗</span>
+      </a>
+      <a class="link-btn accent-gold" href="https://www.google.com/search?q=pool+halls+billiards+bars+Atlanta+GA" target="_blank">
+        <span class="icon">🔍</span>
+        <span class="label"><strong>Google — Billiards Atlanta</strong><span>Bars &amp; venues with pool tables</span></span>
+        <span class="arrow">↗</span>
+      </a>
+    </div>
+
+    <div class="section-label">Pickleball</div>
+    <div class="grid">
+      <a class="link-btn accent-teal" href="https://www.playtime.app/places/united-states/atlanta-ga" target="_blank">
+        <span class="icon">🏓</span>
+        <span class="label"><strong>Playtime — Atlanta Pickleball</strong><span>Find courts &amp; open play sessions</span></span>
+        <span class="arrow">↗</span>
+      </a>
+      <a class="link-btn accent-teal" href="https://www.pickleheads.com/courts/us/ga/atlanta" target="_blank">
+        <span class="icon">🏓</span>
+        <span class="label"><strong>Pickleheads — Atlanta Courts</strong><span>Indoor &amp; outdoor courts map</span></span>
+        <span class="arrow">↗</span>
+      </a>
+      <a class="link-btn accent-teal" href="https://www.meetup.com/find/?keywords=pickleball&location=Atlanta%2C+GA" target="_blank">
+        <span class="icon">👥</span>
+        <span class="label"><strong>Meetup — Pickleball Groups</strong><span>Join open play meetup groups</span></span>
+        <span class="arrow">↗</span>
+      </a>
+      <a class="link-btn accent-teal" href="https://www.facebook.com/events/search/?q=pickleball+atlanta" target="_blank">
+        <span class="icon">👥</span>
+        <span class="label"><strong>FB: Pickleball Atlanta</strong><span>Open play events &amp; leagues <span class="badge badge-login">LOGIN</span></span></span>
+        <span class="arrow">↗</span>
+      </a>
+    </div>
+
+    <div class="section-label">Tennis</div>
+    <div class="grid">
+      <a class="link-btn accent-red" href="https://www.usta.com/en/home/play/adult-tennis/programs/southern/find-a-southern-adult-league.html#tab=findALeague" target="_blank">
+        <span class="icon">🎾</span>
+        <span class="label"><strong>USTA — Atlanta Leagues</strong><span>Find adult tennis leagues nearby</span></span>
+        <span class="arrow">↗</span>
+      </a>
+      <a class="link-btn accent-red" href="https://www.google.com/search?q=public+tennis+courts+Atlanta+GA+open+play" target="_blank">
+        <span class="icon">🎾</span>
+        <span class="label"><strong>Google — Atlanta Tennis Courts</strong><span>Public courts &amp; open play</span></span>
+        <span class="arrow">↗</span>
+      </a>
+      <a class="link-btn accent-red" href="https://www.courtreserve.com/Online/Portal/1001" target="_blank">
+        <span class="icon">📅</span>
+        <span class="label"><strong>CourtReserve</strong><span>Book Atlanta tennis &amp; pickleball</span></span>
+        <span class="arrow">↗</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- BOTH LOVE -->
+  <div class="tab-panel" id="tab-both">
+    <div class="section-label">Trivia Nights — Her Favorite, Your Fun!</div>
+    <div class="grid">
+      <a class="link-btn accent-gold" href="https://www.yelp.com/search?find_desc=trivia+night&find_loc=Atlanta%2C+GA" target="_blank">
+        <span class="icon">🧠</span>
+        <span class="label"><strong>Yelp — Atlanta Trivia Nights</strong><span>Find recurring trivia at bars/restaurants</span></span>
+        <span class="arrow">↗</span>
+      </a>
+      <a class="link-btn accent-gold" href="https://www.facebook.com/events/search/?q=trivia+night+atlanta" target="_blank">
+        <span class="icon">📝</span>
+        <span class="label"><strong>FB: Trivia Nights Atlanta</strong><span>Weekly &amp; themed trivia events <span class="badge badge-login">LOGIN</span></span></span>
+        <span class="arrow">↗</span>
+      </a>
+      <a class="link-btn accent-gold" href="https://www.google.com/search?q=trivia+night+Atlanta+restaurants+bars+weekly" target="_blank">
+        <span class="icon">🔍</span>
+        <span class="label"><strong>Google — Weekly Trivia</strong><span>Find tonight's trivia near you</span></span>
+        <span class="arrow">↗</span>
+      </a>
+      <a class="link-btn accent-gold" href="https://www.eventbrite.com/d/ga--atlanta/trivia/" target="_blank">
+        <span class="icon">🎯</span>
+        <span class="label"><strong>Eventbrite — Trivia Events</strong><span>Special &amp; themed trivia nights</span></span>
+        <span class="arrow">↗</span>
+      </a>
+    </div>
+
+    <div class="section-label">Combo Date Night Ideas</div>
+    <div class="grid">
+      <a class="link-btn accent-purple" href="https://www.google.com/search?q=dinner+and+live+music+atlanta" target="_blank">
+        <span class="icon">🎵🍽️</span>
+        <span class="label"><strong>Dinner + Live Music</strong><span>Venues with food &amp; music together</span></span>
+        <span class="arrow">↗</span>
+      </a>
+      <a class="link-btn accent-purple" href="https://www.google.com/search?q=bowling+bar+atlanta+food" target="_blank">
+        <span class="icon">🎳🍻</span>
+        <span class="label"><strong>Bowling + Bar</strong><span>Upscale bowling with food &amp; drinks</span></span>
+        <span class="arrow">↗</span>
+      </a>
+      <a class="link-btn accent-purple" href="https://www.google.com/search?q=rooftop+bar+live+music+atlanta" target="_blank">
+        <span class="icon">🌆🎸</span>
+        <span class="label"><strong>Rooftop Bar + Music</strong><span>Atlanta's best rooftop venues</span></span>
+        <span class="arrow">↗</span>
+      </a>
+      <a class="link-btn accent-purple" href="https://www.google.com/search?q=pickleball+date+night+atlanta+food+drinks" target="_blank">
+        <span class="icon">🏓🍹</span>
+        <span class="label"><strong>Pickleball + Drinks After</strong><span>Active date + wind-down spots</span></span>
+        <span class="arrow">↗</span>
+      </a>
+    </div>
+
+    <div class="section-label">Outdoor &amp; Festival Finds</div>
+    <div class="grid">
+      <a class="link-btn accent-teal" href="https://www.atlanta.net/events/" target="_blank">
+        <span class="icon">🏙️</span>
+        <span class="label"><strong>Atlanta.net Events</strong><span>Official Atlanta tourism events</span></span>
+        <span class="arrow">↗</span>
+      </a>
+      <a class="link-btn accent-teal" href="https://www.reddit.com/r/Atlanta/search/?q=this+weekend&sort=new" target="_blank">
+        <span class="icon">💬</span>
+        <span class="label"><strong>Reddit r/Atlanta</strong><span>"What's happening this weekend" threads</span></span>
+        <span class="arrow">↗</span>
+      </a>
+      <a class="link-btn accent-teal" href="https://www.facebook.com/events/search/?q=outdoor+festival+atlanta" target="_blank">
+        <span class="icon">🌿</span>
+        <span class="label"><strong>FB: Outdoor Atlanta Events</strong><span>Parks, markets &amp; outdoor fests <span class="badge badge-login">LOGIN</span></span></span>
+        <span class="arrow">↗</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- PLAN AHEAD -->
+  <div class="tab-panel" id="tab-plan">
+    <div class="section-label">Plan the Next 30 Days</div>
+    <div class="grid">
+      <a class="link-btn accent-blue" href="https://www.eventbrite.com/d/ga--atlanta/events/?start_date=today&end_date=30days" target="_blank">
+        <span class="icon">📅</span>
+        <span class="label"><strong>Eventbrite — Next 30 Days</strong><span>All upcoming Atlanta events</span></span>
+        <span class="arrow">↗</span>
+      </a>
+      <a class="link-btn accent-blue" href="https://www.facebook.com/events/search/?q=atlanta&filters=upcoming" target="_blank">
+        <span class="icon">👥</span>
+        <span class="label"><strong>FB: Upcoming Atlanta Events</strong><span>Filter by upcoming month <span class="badge badge-login">LOGIN</span></span></span>
+        <span class="arrow">↗</span>
+      </a>
+      <a class="link-btn accent-blue" href="https://www.ticketmaster.com/search?q=atlanta&radius=30&type=event&sort=date" target="_blank">
+        <span class="icon">🎟️</span>
+        <span class="label"><strong>Ticketmaster — Atlanta</strong><span>Buy tickets before they sell out</span></span>
+        <span class="arrow">↗</span>
+      </a>
+      <a class="link-btn accent-blue" href="https://www.axs.com/search?q=&lat=33.749&lon=-84.388&radius=30&sort=date" target="_blank">
+        <span class="icon">🎤</span>
+        <span class="label"><strong>AXS — Upcoming Atlanta</strong><span>Concerts &amp; events calendar</span></span>
+        <span class="arrow">↗</span>
+      </a>
+    </div>
+
+    <div class="section-label">Recurring Weekly Events (Reliable Standbys)</div>
+    <div class="grid grid-3">
+      <a class="link-btn accent-gold" href="https://www.google.com/search?q=weekly+trivia+night+atlanta+monday+tuesday+wednesday" target="_blank">
+        <span class="icon">🧠</span>
+        <span class="label"><strong>Weekly Trivia Nights</strong><span>Find recurring nights Mon–Sun</span></span>
+        <span class="arrow">↗</span>
+      </a>
+      <a class="link-btn accent-red" href="https://www.google.com/search?q=weekly+live+music+open+mic+atlanta+bars" target="_blank">
+        <span class="icon">🎸</span>
+        <span class="label"><strong>Weekly Live Music</strong><span>Regular music nights at Atlanta bars</span></span>
+        <span class="arrow">↗</span>
+      </a>
+      <a class="link-btn accent-teal" href="https://www.google.com/search?q=open+bowling+atlanta+weeknight+prices" target="_blank">
+        <span class="icon">🎳</span>
+        <span class="label"><strong>Open Bowling Hours</strong><span>Weeknight availability &amp; deals</span></span>
+        <span class="arrow">↗</span>
+      </a>
+      <a class="link-btn accent-teal" href="https://www.google.com/search?q=pickleball+open+play+atlanta+weekly+schedule" target="_blank">
+        <span class="icon">🏓</span>
+        <span class="label"><strong>Pickleball Open Play</strong><span>Weekly open courts near Atlanta</span></span>
+        <span class="arrow">↗</span>
+      </a>
+      <a class="link-btn accent-purple" href="https://www.google.com/search?q=farmers+market+atlanta+weekend" target="_blank">
+        <span class="icon">🌿</span>
+        <span class="label"><strong>Weekend Farmers Markets</strong><span>Outdoor markets to browse together</span></span>
+        <span class="arrow">↗</span>
+      </a>
+      <a class="link-btn accent-gold" href="https://www.google.com/search?q=comedy+open+mic+atlanta+weekly" target="_blank">
+        <span class="icon">😂</span>
+        <span class="label"><strong>Weekly Comedy / Open Mic</strong><span>Regular laugh nights around Atlanta</span></span>
+        <span class="arrow">↗</span>
+      </a>
+    </div>
+
+    <div class="tip">
+      <strong>💡 Pro tip:</strong> Facebook Events is often the BEST source for finding weekly recurring events like trivia nights and local live music — especially at neighborhood bars that don't post to Eventbrite. If you log into Facebook and search <em>"Atlanta this week"</em>, you'll find things that don't show up anywhere else.
+    </div>
+  </div>
+
+  <!-- CLAUDE TAB -->
+  <div class="tab-panel" id="tab-claude">
+    <div class="section-label">Get AI-Curated Date Night Ideas</div>
+    <div class="prompt-card">
+      <h3>🤖 Copy this prompt → paste into Claude.ai</h3>
+      <div class="prompt-text" id="claudePrompt">You are my Roswell/Atlanta Date Night Planner. Search the web for real, current events within 20 miles of Downtown Roswell, GA this week and the next 30 days.
+
+My wife loves: restaurants, live music, comedy shows, festivals, trivia nights.
+I love: bowling, billiards/pool, tennis, pickleball, active experiences.
+We both love: trivia nights, combining food + activity or show, outdoor events.
+Home base: Downtown Roswell, GA — within 20 miles.
+
+Please search and give me:
+
+1. THIS WEEK (next 7 days) — 5-8 specific events with: name, venue, neighborhood, date/time, price, why we'd like it, and a link.
+
+2. COMING UP (next 30 days) — 6-10 notable events worth planning for, same format.
+
+3. STANDING WEEKLY OPTIONS — 5 reliable recurring events (trivia nights, open bowling, weekly music nights, etc.) with venue, day/time, and contact info.
+
+4. DATE NIGHT COMBOS — 2-3 suggestions pairing two nearby things (e.g. "Dinner at X + Trivia at Y nearby").
+
+Flag free/under $20 events, romantic/upscale spots, and outdoor events. Be conversational — like a friend who knows Atlanta well.</div>
+      <button class="copy-btn" id="copyBtn" onclick="copyPrompt()">📋 Copy Prompt to Clipboard</button>
+    </div>
+
+    <div class="tip">
+      <strong>💡 Even better:</strong> Go to <a href="https://claude.ai" target="_blank" style="color:#c9a0ff">claude.ai</a> → create a free <strong>Project</strong> called "Date Nights" → paste the prompt above into the Project Instructions. Then any time you open that project and say <em>"What's going on in Atlanta this weekend?"</em> — Claude will search and answer automatically, no copy-pasting needed.
+    </div>
+
+    <div class="section-label">Quick Ask Claude</div>
+    <div class="grid grid-3">
+      <a class="link-btn accent-blue" href="https://claude.ai/new?q=Search+for+live+music+events+in+Atlanta+GA+this+weekend+with+ticket+links" target="_blank">
+        <span class="icon">🎵</span>
+        <span class="label"><strong>Live Music This Weekend</strong><span>Ask Claude to search &amp; curate</span></span>
+        <span class="arrow">↗</span>
+      </a>
+      <a class="link-btn accent-gold" href="https://claude.ai/new?q=Find+trivia+nights+happening+in+Atlanta+GA+this+week+at+bars+and+restaurants" target="_blank">
+        <span class="icon">🧠</span>
+        <span class="label"><strong>Trivia Nights This Week</strong><span>Ask Claude to find tonight's trivia</span></span>
+        <span class="arrow">↗</span>
+      </a>
+      <a class="link-btn accent-purple" href="https://claude.ai/new?q=What+festivals+and+outdoor+events+are+happening+in+Atlanta+GA+this+month" target="_blank">
+        <span class="icon">🎪</span>
+        <span class="label"><strong>Festivals This Month</strong><span>Ask Claude to find upcoming fests</span></span>
+        <span class="arrow">↗</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- ✨ LIVE SEARCH TAB -->
+  <div class="tab-panel" id="tab-search">
+    <div class="section-label">One-Click AI Event Search — Uses Your Claude.ai Account</div>
+
+    <div class="live-search-hero">
+      <div class="live-search-icon">✨</div>
+      <h2 class="live-search-title">Search Atlanta Events Right Now</h2>
+      <p class="live-search-sub">One click searches everything — or pick a category below, tweak the prompt, then launch.</p>
+      <button class="main-launch-btn" onclick="loadPrompt('full')">
+        🔍 &nbsp;Search All Atlanta Events Tonight
+      </button>
+      <p class="live-search-note">Loads prompt below to edit · Then click Open in Claude.ai · Free</p>
+    </div>
+
+    <div class="section-label">Search by Category — Edit Prompt First If You Want</div>
+    <div class="grid">
+      <button class="launch-card accent-red" onclick="loadPrompt('music')">
+        <span class="launch-icon">🎵</span>
+        <span class="launch-label"><strong>Live Music</strong><span>Concerts, bands & jazz in Atlanta this week</span></span>
+        <span class="launch-arrow">✏️</span>
+      </button>
+      <button class="launch-card accent-gold" onclick="loadPrompt('trivia')">
+        <span class="launch-icon">🧠</span>
+        <span class="launch-label"><strong>Trivia Nights</strong><span>Weekly trivia at bars & restaurants</span></span>
+        <span class="launch-arrow">✏️</span>
+      </button>
+      <button class="launch-card accent-teal" onclick="loadPrompt('sports')">
+        <span class="launch-icon">🏓</span>
+        <span class="launch-label"><strong>Active & Sports</strong><span>Pickleball, bowling, tennis & more</span></span>
+        <span class="launch-arrow">✏️</span>
+      </button>
+      <button class="launch-card accent-blue" onclick="loadPrompt('food')">
+        <span class="launch-icon">🍽️</span>
+        <span class="launch-label"><strong>Date Night Dining</strong><span>Romantic spots & special dinner events</span></span>
+        <span class="launch-arrow">✏️</span>
+      </button>
+      <button class="launch-card accent-purple" onclick="loadPrompt('comedy')">
+        <span class="launch-icon">😂</span>
+        <span class="launch-label"><strong>Comedy Shows</strong><span>Stand-up, improv & open mics</span></span>
+        <span class="launch-arrow">✏️</span>
+      </button>
+      <button class="launch-card accent-gold" onclick="loadPrompt('festival')">
+        <span class="launch-icon">🎪</span>
+        <span class="launch-label"><strong>Festivals & Outdoor</strong><span>Outdoor events, markets & festivals</span></span>
+        <span class="launch-arrow">✏️</span>
+      </button>
+    </div>
+
+    <!-- Editable prompt area — appears when a category is clicked -->
+    <div id="promptEditor" class="prompt-editor" style="display:none;">
+      <div class="prompt-editor-header">
+        <span id="promptEditorLabel" class="prompt-editor-title">✏️ Edit prompt before sending</span>
+        <button class="prompt-reset-btn" onclick="resetPrompt()">↩ Reset</button>
+      </div>
+      <textarea id="promptTextarea" class="prompt-textarea" rows="10" spellcheck="false"></textarea>
+      <div class="prompt-editor-footer">
+        <span class="prompt-editor-hint">Edit anything above — add a neighborhood, change the date range, whatever you need.</span>
+        <button class="prompt-launch-btn" onclick="launchFromEditor()">Open in Claude.ai →</button>
+      </div>
+    </div>
+
+    <div class="tip" style="margin-top:24px;">
+      <strong>💡 How it works:</strong> The big button does a full one-click search. The category buttons load the prompt into an editable box so you can tweak it — change a neighborhood, add a preference, narrow the date — then click <em>Open in Claude.ai</em> to send it. Uses your existing Claude subscription, no extra cost.
+    </div>
+  </div>
+
+</div>
+
+<div class="footer">
+  Made with <span>❤️</span> for date nights in Atlanta &nbsp;·&nbsp; Bookmark this page for weekly use
+</div>
+
+<script>
+  // =====================
+  // TAB SWITCHING
+  // =====================
+  function showTab(id, btn) {
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('tab-' + id).classList.add('active');
+    if (btn) btn.classList.add('active');
+  }
+
+  // =====================
+  // DATE DISPLAY
+  // =====================
+  const DAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const now = new Date();
+  document.getElementById('dateDisplay').innerHTML =
+    `Today is <span>${DAYS[now.getDay()]}, ${MONTHS[now.getMonth()]} ${now.getDate()}, ${now.getFullYear()}</span>`;
+
+  // =====================
+  // WEEKLY CALENDAR STRIP
+  // =====================
+  const grid = document.getElementById('weeklyGrid');
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(now);
+    d.setDate(now.getDate() + i);
+    const isToday = i === 0;
+    const div = document.createElement('div');
+    div.className = 'day-card' + (isToday ? ' today' : '');
+    div.innerHTML = `<div class="day-name">${DAYS[d.getDay()].slice(0,3)}</div><div class="day-num">${d.getDate()}</div><div class="day-dot"></div>`;
+    div.title = `Search Atlanta events for ${DAYS[d.getDay()]}`;
+    div.onclick = () => window.open(`https://www.google.com/search?q=things+to+do+atlanta+${DAYS[d.getDay()].toLowerCase()}+${d.getMonth()+1}-${d.getDate()}&ibp=htl;events`, '_blank');
+    grid.appendChild(div);
+  }
+
+  // =====================
+  // COPY PROMPT
+  // =====================
+  function copyPrompt() {
+    const text = document.getElementById('claudePrompt').innerText;
+    navigator.clipboard.writeText(text).then(() => {
+      const btn = document.getElementById('copyBtn');
+      btn.textContent = '✅ Copied!';
+      btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = '📋 Copy Prompt to Clipboard'; btn.classList.remove('copied'); }, 2500);
+    });
+  }
+
+  // ===========================
+  // LIVE SEARCH — ONE-CLICK LAUNCH
+  // ===========================
+  function launchClaude(type) {
+    const d = new Date();
+    const dateStr = d.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    const prompt = buildPromptText(type, dateStr);
+    const url = 'https://claude.ai/new?q=' + encodeURIComponent(prompt);
+    window.open(url, '_blank');
+  }
+
+  // Load a prompt into the editable area without launching
+  let currentPromptType = 'full';
+
+  function loadPrompt(type) {
+    currentPromptType = type;
+    const d = new Date();
+    const dateStr = d.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    const prompt = buildPromptText(type, dateStr);
+
+    const labels = {
+      music: '🎵 Live Music — Edit prompt before sending',
+      trivia: '🧠 Trivia Nights — Edit prompt before sending',
+      sports: '🏓 Active & Sports — Edit prompt before sending',
+      food: '🍽️ Date Night Dining — Edit prompt before sending',
+      comedy: '😂 Comedy Shows — Edit prompt before sending',
+      festival: '🎪 Festivals & Outdoor — Edit prompt before sending',
+      full: '✨ Full Search — Edit prompt before sending'
+    };
+
+    document.getElementById('promptEditorLabel').textContent = labels[type] || labels.full;
+    document.getElementById('promptTextarea').value = prompt;
+
+    const editor = document.getElementById('promptEditor');
+    editor.style.display = 'block';
+    editor.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  function resetPrompt() {
+    const d = new Date();
+    const dateStr = d.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    document.getElementById('promptTextarea').value = buildPromptText(currentPromptType, dateStr);
+  }
+
+  function launchFromEditor() {
+    const text = document.getElementById('promptTextarea').value.trim();
+    if (!text) return;
+    const url = 'https://claude.ai/new?q=' + encodeURIComponent(text);
+    window.open(url, '_blank');
+  }
+
+  function buildPromptText(type, dateStr) {
+    const colorKey = `\nColor-code every event with an emoji at the start of its line:
+🟢 = happening TODAY (${dateStr})
+🟡 = happening later this week (not today)
+📅 = coming up beyond this week\n`;
+
+    const location = `Home base: Downtown Roswell, GA — include anything within 20 miles (covers most of metro Atlanta, Alpharetta, Sandy Springs, Marietta, Buckhead, Midtown, etc.).`;
+
+    const prompts = {
+      full: `Today is ${dateStr}. You are my Roswell/Atlanta Date Night Planner. Search across ALL of these sources — do not skip any: Eventbrite, Facebook Events (search "Atlanta this week" AND "Roswell GA events"), Bandsintown, Songkick, Ticketmaster, AXS, Atlanta Magazine (atlantamagazine.com/things-to-do), Yelp Events, AroundAtlanta.com, atlanta.net/events, Eater Atlanta, Google Events, and specifically search for comedy at: Punchline Comedy Club, Laughing Skull Lounge, Atlanta Comedy Theater, and any touring comedians at Coca-Cola Roxy, Tabernacle, or City Winery Atlanta.
+
+My wife loves: restaurants, live music, comedy shows, festivals, trivia nights.
+I love: bowling, billiards/pool, tennis, pickleball, active experiences.
+We both love: trivia nights, combining food + activity, outdoor events.
+${location}
+${colorKey}
+Give me these sections:
+
+1. THIS WEEK (next 7 days) — 5 to 8 specific events with name, venue, neighborhood, date/time, price, and a link.
+2. COMING UP (next 30 days) — 6 to 10 notable events worth planning for, same format.
+3. COMEDY THIS WEEK — Search thoroughly: Punchline Comedy Club, Laughing Skull Lounge, Atlanta Comedy Theater, City Winery, Tabernacle, Eventbrite comedy, Ticketmaster comedy Atlanta, and Facebook Events "comedy Atlanta." List every show you find — do not filter these down, I want the full list.
+4. WEEKLY STANDBYS — 5 reliable recurring events (trivia nights, open bowling, weekly live music nights) with venue, neighborhood, day/time, and how to confirm.
+5. DATE NIGHT COMBOS — 2 or 3 combo suggestions pairing two nearby things, like dinner then trivia nearby.
+6. HAPPENING IN ROSWELL — Search specifically for events, restaurants, live music, festivals, and activities in Roswell, GA (Canton St, Roswell Town Square, Old Roswell area). Include any recurring events, seasonal happenings, or weekend activities right in our backyard.
+
+Flag: 💚 free or under $20 · 🌹 romantic/upscale · 🌿 outdoor. Be conversational, like a friend who knows this area really well.`,
+
+      music: `Today is ${dateStr}. Search for live music events and concerts happening within 20 miles of Downtown Roswell, GA this week and next week. Check: Bandsintown (bandsintown.com/c/atlanta-ga), Songkick, Ticketmaster, AXS, Eventbrite Atlanta, Facebook Events (search "Atlanta live music" and "Roswell live music"), and Yelp Events Atlanta. Include small intimate venues and larger shows — a good mix. Also check venues like City Winery Atlanta, Tabernacle, Coca-Cola Roxy, and any spots in Roswell/Alpharetta/Sandy Springs.
+${colorKey}
+For each event give: artist or band name, venue, city/neighborhood, date and time, ticket price, and a link. Note which are especially good for a date night. Flag 💚 free or cheap and 🌹 especially romantic venues.`,
+
+      trivia: `Today is ${dateStr}. Search for trivia nights happening within 20 miles of Downtown Roswell, GA this week and next week. Check: Facebook Events (search "trivia night Atlanta" and "trivia night Roswell"), Eventbrite Atlanta trivia, Yelp Events, and Google "trivia night Roswell GA" and "trivia night Atlanta bars restaurants weekly." Include recurring weekly nights and special themed events. Also check spots in Alpharetta, Sandy Springs, and Marietta.
+${colorKey}
+For each give: venue name, city/neighborhood, day and time, cost, trivia style, and a link or number to confirm. Note which are especially fun for couples. Flag 💚 free ones.`,
+
+      sports: `Today is ${dateStr}. Search for active date night options within 20 miles of Downtown Roswell, GA this week. Check: Playtime app (pickleball), Pickleheads Atlanta, Meetup.com pickleball groups, Stars & Strikes (multiple locations), Bowlero Marietta, CourtReserve for tennis, Eventbrite for active events, and Facebook Events (search "pickleball Roswell" and "pickleball Atlanta"). Also check for Top Golf, Andretti Indoor Karting, or other active entertainment venues nearby.
+${colorKey}
+For each give: venue name, city, what's available, date and time, cost, and how to book. Flag 💚 budget options.`,
+
+      food: `Today is ${dateStr}. Search for the best date night dining experiences within 20 miles of Downtown Roswell, GA right now. Check: Eater Atlanta (atlanta.eater.com), OpenTable for special events, Eventbrite for dinner pop-ups, Yelp top-rated restaurants, and Atlanta Magazine food coverage. Also search specifically for restaurants on Canton Street in Roswell and in Alpharetta and Sandy Springs. Look for new openings, special dinner events, prix fixe nights, chef's tables, and romantic spots.
+${colorKey}
+For each give: restaurant name, city/neighborhood, vibe and cuisine, price range per person, standout dish or experience, and reservation link. Flag 🌹 especially romantic and 💚 good value.`,
+
+      comedy: `Today is ${dateStr}. Do a thorough search for ALL comedy shows happening within 20 miles of Downtown Roswell, GA this week and next two weeks. You MUST check every one of these sources — do not skip any:
+- Punchline Comedy Club Atlanta (punchlineatlanta.com)
+- Laughing Skull Lounge (laughingskull.com)
+- Atlanta Comedy Theater
+- City Winery Atlanta
+- Tabernacle Atlanta
+- Coca-Cola Roxy
+- Eventbrite (search "comedy Atlanta" and "stand-up Atlanta")
+- Ticketmaster (search "comedy Atlanta")
+- Facebook Events (search "comedy show Atlanta" and "stand-up Atlanta")
+- Google search "comedy shows Atlanta this week" and "comedy shows Roswell GA"
+
+List EVERY show you find — do not filter or shorten the list. I want complete coverage.
+${colorKey}
+For each give: comedian or show name, venue, city, date and time, ticket price, show type (headliner/open mic/improv), and a direct link to buy tickets or get info. Flag 💚 free or under $20 shows.`,
+
+      festival: `Today is ${dateStr}. Search for outdoor events, festivals, and markets happening within 20 miles of Downtown Roswell, GA this week and this month. Check: Eventbrite (search "Atlanta festivals" and "Roswell GA events"), Facebook Events (search "festival Atlanta" and "Roswell events" and "outdoor Atlanta"), Atlanta Magazine things-to-do, atlanta.net/events, and AroundAtlanta.com. Also search specifically for events on Canton Street Roswell, Roswell Town Square, and in Alpharetta and Marietta.
+${colorKey}
+Include street festivals, farmers markets, outdoor concerts, park events, art fairs, food festivals. Give name, exact location, dates and hours, cost, and a link. Flag 💚 free events and 🌹 especially romantic outdoor spots.`
+    };
+    return prompts[type] || prompts.full;
+  }
+
+  // kept for backward compat — not used anymore
+  function initSearchTab() {
+    const key = localStorage.getItem('atlanta_dn_api_key');
+    if (key) {
+      document.getElementById('apiKeySetup').style.display = 'none';
+      document.getElementById('searchPanel').style.display = 'block';
+    } else {
+      document.getElementById('apiKeySetup').style.display = 'block';
+      document.getElementById('searchPanel').style.display = 'none';
+    }
+  }
+
+  function saveApiKey() {
+    const key = document.getElementById('apiKeyInput').value.trim();
+    const errEl = document.getElementById('apiKeyError');
+    if (!key) {
+      errEl.textContent = 'Please paste your API key above.';
+      errEl.style.display = 'block';
+      return;
+    }
+    if (!key.startsWith('sk-ant-')) {
+      errEl.textContent = 'That doesn\'t look like a valid Anthropic API key (should start with sk-ant-). Double-check and try again.';
+      errEl.style.display = 'block';
+      return;
+    }
+    errEl.style.display = 'none';
+    localStorage.setItem('atlanta_dn_api_key', key);
+    document.getElementById('apiKeyInput').value = '';
+    document.getElementById('apiKeySetup').style.display = 'none';
+    document.getElementById('searchPanel').style.display = 'block';
+  }
+
+  function changeKey() {
+    localStorage.removeItem('atlanta_dn_api_key');
+    document.getElementById('searchResultsArea').classList.remove('visible');
+    document.getElementById('searchTimestamp').classList.remove('visible');
+    document.getElementById('searchPanel').style.display = 'none';
+    document.getElementById('apiKeySetup').style.display = 'block';
+    document.getElementById('apiKeyInput').value = '';
+    document.getElementById('apiKeyError').style.display = 'none';
+  }
+
+  // ===========================
+  // LIVE SEARCH — PROMPTS
+  // ===========================
+  function buildPrompt(type) {
+    const d = new Date();
+    const dateStr = d.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+    const base = `Today is ${dateStr}. `;
+
+    const prompts = {
+      full: base + `Search the web for real, current events happening in Atlanta, GA this week and the next 30 days.
+
+My wife loves: restaurants, live music, comedy shows, festivals, trivia nights.
+I love: bowling, billiards/pool, tennis, pickleball, active experiences.
+We both love: trivia nights, combining food + activity, outdoor events.
+Location: Atlanta, GA — willing to travel up to 20 miles.
+
+Please search and give me:
+
+**1. THIS WEEK (next 7 days)** — 5–8 specific events with: event name, venue, neighborhood, exact date/time, ticket price, why we'd like it, and a website link.
+
+**2. COMING UP (next 30 days)** — 6–10 notable events worth planning for, same format.
+
+**3. WEEKLY STANDBYS** — 5 reliable recurring events (trivia nights, open bowling, weekly live music nights) with venue name, neighborhood, day/time, and how to book or confirm.
+
+**4. DATE NIGHT COMBOS** — 2–3 combo suggestions pairing two nearby activities (e.g. "Dinner at X then Trivia at Y a few blocks away").
+
+Flag events that are free or under $20, especially romantic or upscale options, and outdoor events. Write in a conversational tone like a friend who knows Atlanta really well.`,
+
+      music: base + `Search the web for live music events and concerts happening in Atlanta, GA this week and the next 2 weeks. Include a mix of small intimate venues and larger shows. For each event give: artist/band name, venue, neighborhood, date and time, ticket price range, genre/vibe, and a link to buy tickets or get more info. Mention which ones are especially good for a date night. Include any free or low-cost options.`,
+
+      trivia: base + `Search for trivia nights happening in Atlanta, GA this week and next week at bars and restaurants. Include both recurring weekly trivia nights (the reliable standbys) and any special themed trivia events. For each one give: venue name, neighborhood, day and time, cost to enter, what kind of trivia, and a link or phone number to confirm. Note which ones are especially fun for couples.`,
+
+      sports: base + `Search for active date night options in Atlanta, GA this week and weekend — specifically: pickleball open play sessions, bowling (with lane availability), tennis open play or lessons, and any other active/sports experiences. For each, give: venue name, neighborhood, date/time available, cost, and how to book. Also mention any "date night" specials at bowling alleys or sports bars with games.`,
+
+      food: base + `Search for the best date night dining experiences in Atlanta, GA right now. Include: hot new restaurant openings in the last few months, special dining events (prix fixe nights, wine dinners, chef's tables, pop-ups), and the most romantic or impressive spots for a nice evening out. For each give: restaurant name, neighborhood, vibe/cuisine type, price range per person, must-order dish or experience highlight, and reservation link. Favor unique, memorable experiences over chains.`,
+
+      comedy: base + `Search for comedy shows and events happening in Atlanta, GA this week and next week. Include stand-up shows, improv nights, open mics, and comedy festivals. For each give: show name or comedian, venue, neighborhood, date and time, ticket price, and a link. Note which ones are more polished headliner shows vs. casual open-mic vibes. Include free or cheap options too.`
+    };
+
+    return prompts[type] || prompts.full;
+  }
+
+  const SEARCH_TYPE_LABELS = {
+    full: '✨ Full Date Night Search',
+    music: '🎵 Live Music',
+    trivia: '🧠 Trivia Nights',
+    sports: '🏓 Active & Sports',
+    food: '🍽️ Dining',
+    comedy: '😂 Comedy'
+  };
+
+  // ===========================
+  // LIVE SEARCH — API CALL
+  // ===========================
+  let lastSearchType = 'full';
+
+  async function doSearch(type) {
+    const apiKey = localStorage.getItem('atlanta_dn_api_key');
+    if (!apiKey) { changeKey(); return; }
+
+    lastSearchType = type;
+    const prompt = buildPrompt(type);
+    const searchStart = new Date();
+
+    // Disable all buttons
+    setButtonsDisabled(true);
+
+    // Show loading
+    const resultsArea = document.getElementById('searchResultsArea');
+    const tsEl = document.getElementById('searchTimestamp');
+    resultsArea.classList.add('visible');
+    tsEl.classList.remove('visible');
+
+    resultsArea.innerHTML = `
+      <div class="search-loading">
+        <span class="search-spinner">⟳</span>
+        <p class="main-msg">Scanning Atlanta events across the web…</p>
+        <p class="sub-msg">Claude is checking event sites, verifying dates, and curating results.<br>This usually takes 20–40 seconds — hang tight!</p>
+      </div>`;
+
+    try {
+      const response = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': apiKey,
+          'anthropic-version': '2023-06-01',
+          'anthropic-beta': 'web-search-2025-03-05',
+          'anthropic-dangerous-direct-browser-access': 'true'
+        },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-5-20250929',
+          max_tokens: 8192,
+          tools: [{ type: 'web_search_20250305', name: 'web_search' }],
+          messages: [{ role: 'user', content: prompt }]
+        })
+      });
+
+      if (!response.ok) {
+        let errMsg = `HTTP ${response.status}`;
+        try {
+          const errData = await response.json();
+          errMsg = errData.error?.message || errMsg;
+        } catch(e) {}
+        throw new Error(errMsg);
+      }
+
+      const data = await response.json();
+
+      // Extract text blocks from the response
+      let resultText = '';
+      if (data.content && Array.isArray(data.content)) {
+        for (const block of data.content) {
+          if (block.type === 'text') {
+            resultText += block.text + '\n';
+          }
+        }
+      }
+
+      if (!resultText.trim()) {
+        throw new Error('No results returned from search. Please try again.');
+      }
+
+      // Build timestamp
+      const elapsed = Math.round((new Date() - searchStart) / 1000);
+      const timeStr = searchStart.toLocaleDateString('en-US', {
+        weekday: 'long', month: 'long', day: 'numeric', year: 'numeric'
+      }) + ' at ' + searchStart.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+
+      tsEl.innerHTML = `🕐 &nbsp;<strong>${SEARCH_TYPE_LABELS[type]}</strong> &nbsp;·&nbsp; Searched: ${timeStr} &nbsp;·&nbsp; ${elapsed}s`;
+      tsEl.classList.add('visible');
+
+      // Render results
+      resultsArea.innerHTML = `
+        <div class="result-header-bar">
+          <span class="search-type-badge">${SEARCH_TYPE_LABELS[type]}</span>
+          <button class="refresh-inline-btn" onclick="doSearch('${type}')">↻ Refresh</button>
+        </div>
+        <div class="result-content">${renderMarkdown(resultText)}</div>`;
+
+    } catch (err) {
+      let hint = '';
+      if (err.message.includes('401') || err.message.includes('invalid') || err.message.includes('authentication')) {
+        hint = 'Your API key may be incorrect or expired. <button class="change-key-btn" onclick="changeKey()" style="font-size:0.88rem;text-decoration:underline;color:#c9a0ff;background:none;border:none;cursor:pointer;">Update API key →</button>';
+      } else if (err.message.includes('429') || err.message.includes('rate')) {
+        hint = 'You\'ve hit the rate limit. Wait a minute and try again.';
+      } else if (err.message.includes('credits') || err.message.includes('balance')) {
+        hint = 'Your API account may be out of credits. <a href="https://console.anthropic.com/settings/billing" target="_blank" style="color:#c9a0ff">Check your balance →</a>';
+      } else if (err.message.includes('Failed to fetch') || err.message.includes('NetworkError')) {
+        hint = 'Network error — check your internet connection and try again.';
+      }
+
+      resultsArea.innerHTML = `
+        <div class="search-error">
+          <p><strong>❌ Search failed:</strong> ${err.message}</p>
+          ${hint ? `<p style="margin-top:10px;">${hint}</p>` : ''}
+          <p style="margin-top:10px;font-size:0.82rem;color:var(--muted);">
+            Need help? Check <a href="https://console.anthropic.com" target="_blank" style="color:#c9a0ff">console.anthropic.com</a>
+          </p>
+        </div>`;
+    }
+
+    setButtonsDisabled(false);
+  }
+
+  function setButtonsDisabled(disabled) {
+    const ids = ['mainSearchBtn', 'qMusic', 'qTrivia', 'qSports', 'qFood', 'qComedy'];
+    ids.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.disabled = disabled;
+        el.style.opacity = disabled ? '0.45' : '1';
+        el.style.cursor = disabled ? 'not-allowed' : 'pointer';
+      }
+    });
+  }
+
+  // ===========================
+  // MARKDOWN → HTML RENDERER
+  // ===========================
+  function renderMarkdown(md) {
+    // Escape HTML
+    let safe = md
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+
+    const lines = safe.split('\n');
+    const out = [];
+    let inUL = false;
+    let inOL = false;
+
+    function closeList() {
+      if (inUL) { out.push('</ul>'); inUL = false; }
+      if (inOL) { out.push('</ol>'); inOL = false; }
+    }
+
+    function inlineFormat(txt) {
+      // Bold
+      txt = txt.replace(/\*\*([^*\n]+?)\*\*/g, '<strong>$1</strong>');
+      // Italic
+      txt = txt.replace(/\*([^*\n]+?)\*/g, '<em>$1</em>');
+      // Links
+      txt = txt.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" class="result-link">$1 ↗</a>');
+      // Inline code
+      txt = txt.replace(/`([^`]+)`/g, '<code>$1</code>');
+      return txt;
+    }
+
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      const trimmed = line.trim();
+
+      // Horizontal rule
+      if (/^---+$/.test(trimmed) || /^\*\*\*+$/.test(trimmed)) {
+        closeList();
+        out.push('<hr>');
+        continue;
+      }
+
+      // Headers
+      if (trimmed.startsWith('#### ')) {
+        closeList();
+        out.push(`<h4 class="result-h4">${inlineFormat(trimmed.slice(5))}</h4>`);
+      } else if (trimmed.startsWith('### ')) {
+        closeList();
+        out.push(`<h3 class="result-h3">${inlineFormat(trimmed.slice(4))}</h3>`);
+      } else if (trimmed.startsWith('## ')) {
+        closeList();
+        out.push(`<h2 class="result-h2">${inlineFormat(trimmed.slice(3))}</h2>`);
+      } else if (trimmed.startsWith('# ')) {
+        closeList();
+        out.push(`<h1 class="result-h1">${inlineFormat(trimmed.slice(2))}</h1>`);
+      }
+      // Unordered list
+      else if (/^[-*•] /.test(trimmed)) {
+        if (inOL) { out.push('</ol>'); inOL = false; }
+        if (!inUL) { out.push('<ul class="result-list">'); inUL = true; }
+        out.push(`<li>${inlineFormat(trimmed.replace(/^[-*•] /, ''))}</li>`);
+      }
+      // Ordered list
+      else if (/^\d+\.\s/.test(trimmed)) {
+        if (inUL) { out.push('</ul>'); inUL = false; }
+        if (!inOL) { out.push('<ol class="result-list">'); inOL = true; }
+        out.push(`<li>${inlineFormat(trimmed.replace(/^\d+\.\s/, ''))}</li>`);
+      }
+      // Empty line
+      else if (trimmed === '') {
+        closeList();
+        // Don't add extra <br> between headers/lists, just skip
+        if (out.length > 0 && !out[out.length-1].endsWith('</h1>') &&
+            !out[out.length-1].endsWith('</h2>') &&
+            !out[out.length-1].endsWith('</h3>') &&
+            !out[out.length-1].endsWith('</h4>') &&
+            !out[out.length-1].endsWith('</ul>') &&
+            !out[out.length-1].endsWith('</ol>') &&
+            !out[out.length-1].endsWith('<hr>')) {
+          out.push('<br>');
+        }
+      }
+      // Regular paragraph line
+      else {
+        closeList();
+        out.push(`<p class="result-p">${inlineFormat(trimmed)}</p>`);
+      }
+    }
+
+    closeList();
+    return out.join('');
+  }
+</script>
+
+<script>
+  // Register service worker for PWA/offline support
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js').catch(() => {});
+    });
+  }
+</script>
+</body>
+</html>

@@ -4,7 +4,7 @@
 const CACHE_NAME = 'atlanta-date-night-v1';
 
 const APP_SHELL = [
-  './Atlanta_Date_Night.html',
+  './index.html',
   './gift-ideas.html',
   './manifest.json',
   './icons/icon-192.png',
@@ -56,7 +56,7 @@ self.addEventListener('fetch', event => {
     }).catch(() => {
       // Offline fallback for navigation requests
       if (event.request.mode === 'navigate') {
-        return caches.match('./Atlanta_Date_Night.html');
+        return caches.match('./index.html');
       }
     })
   );

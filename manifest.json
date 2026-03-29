@@ -2,7 +2,7 @@
   "name": "Atlanta Date Night",
   "short_name": "Date Night",
   "description": "Atlanta date night ideas, event search, and AI-powered planning.",
-  "start_url": "./Atlanta_Date_Night.html",
+  "start_url": "./index.html",
   "display": "standalone",
   "orientation": "portrait-primary",
   "background_color": "#0f0f1a",
